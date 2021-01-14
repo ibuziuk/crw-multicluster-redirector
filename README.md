@@ -43,6 +43,14 @@ You can then execute your native executable with: `./target/crw-multicluster-red
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html.
 
+## Creating the Image
+
+```shell script
+./mvnw clean package -Dquarkus.container-image.push=true
+```
+
+The list of released images is available on [quay.io](https://quay.io/repository/ibuziuk/crw-multicluster-redirector?tab=tags)
+
 # RESTEasy JAX-RS
 
 <p>A Hello World RESTEasy resource</p>
