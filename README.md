@@ -43,13 +43,19 @@ You can then execute your native executable with: `./target/crw-multicluster-red
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html.
 
-## Creating the Image
+## Creating an image
 
 ```shell script
 ./mvnw clean package -Dquarkus.container-image.push=true
 ```
 
 The list of released images is available on [quay.io](https://quay.io/repository/ibuziuk/crw-multicluster-redirector?tab=tags)
+
+## Deploying on OpenShift
+
+```shell script
+oc process -f deploy/crw-multicluster-redirector.yaml | oc apply -f -
+```
 
 # RESTEasy JAX-RS
 

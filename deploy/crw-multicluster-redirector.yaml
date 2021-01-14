@@ -1,0 +1,118 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: crw-multicluster-redirector
+  creationTimestamp: null
+objects:
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: crw-multicluster-redirector
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: crw-multicluster-redirector
+  spec:
+    strategy:
+      type: Rolling
+      rollingParams:
+        updatePeriodSeconds: 1
+        intervalSeconds: 1
+        timeoutSeconds: 600
+        maxUnavailable: 25%
+        maxSurge: 25%
+      resources:
+        requests:
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+    triggers:
+      - type: ConfigChange
+    replicas: 3
+    test: false
+    selector:
+      app: crw-multicluster-redirector
+      deploymentconfig: crw-multicluster-redirector
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: crw-multicluster-redirector
+          deploymentconfig: crw-multicluster-redirector
+      spec:
+        volumes:
+          - name: crw-multicluster-redirector-volume-1
+            emptyDir: {}
+        containers:
+          - name: crw-multicluster-redirector
+            image: ${IMAGE}:${IMAGE_TAG}
+            livenessProbe:
+              failureThreshold: 3
+              httpGet:
+                path: /hello
+                port: 8080
+                scheme: HTTP
+              initialDelaySeconds: 60
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 1
+            readinessProbe:
+              failureThreshold: 3
+              httpGet:
+                path: /hello
+                port: 8080
+                scheme: HTTP
+              initialDelaySeconds: 60
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 1
+            ports:
+              - containerPort: 8080
+                protocol: TCP
+            terminationMessagePath: /dev/termination-log
+            resources: {}
+            volumeMounts:
+              - name: crw-multicluster-redirector-volume-1
+                mountPath: /tmp
+            imagePullPolicy: IfNotPresent
+        restartPolicy: Always
+        terminationGracePeriodSeconds: 30
+        dnsPolicy: ClusterFirst
+        securityContext: {}
+  status: {}
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: crw-multicluster-redirector
+    creationTimestamp: null
+    labels:
+      app: crw-multicluster-redirector
+  spec:
+    ports:
+      - name: 8080-tcp
+        protocol: TCP
+        port: 8080
+        targetPort: 8080
+    selector:
+      app: crw-multicluster-redirector
+      deploymentconfig: crw-multicluster-redirector
+    type: ClusterIP
+    sessionAffinity: None
+  status:
+    loadBalancer: {  }
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: crw-multicluster-redirector
+    creationTimestamp: null
+  spec:
+    to:
+      kind: Service
+      name: crw-multicluster-redirector
+      weight: 100
+    wildcardPolicy: None
+parameters:
+- name: IMAGE
+  value: quay.io/ibuziuk/crw-multicluster-redirector
+- name: IMAGE_TAG
+  value: latest
