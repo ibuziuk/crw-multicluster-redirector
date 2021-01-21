@@ -28,7 +28,7 @@ objects:
           memory: 512Mi
     triggers:
       - type: ConfigChange
-    replicas: 3
+    replicas: 1
     test: false
     selector:
       app: crw-multicluster-redirector
