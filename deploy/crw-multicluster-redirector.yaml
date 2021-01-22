@@ -23,7 +23,7 @@ objects:
         maxSurge: 25%
       resources:
         requests:
-          memory: 256Mi
+          memory: 128Mi
         limits:
           memory: 512Mi
     triggers:
@@ -118,4 +118,4 @@ parameters:
 - name: IMAGE
   value: quay.io/ibuziuk/crw-multicluster-redirector
 - name: IMAGE_TAG
-  value: latest
+  value: '0.0.1'
