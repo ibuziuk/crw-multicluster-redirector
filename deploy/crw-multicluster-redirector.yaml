@@ -111,6 +111,9 @@ objects:
       name: crw-multicluster-redirector
       weight: 100
     wildcardPolicy: None
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
 parameters:
 - name: IMAGE
   value: quay.io/ibuziuk/crw-multicluster-redirector
