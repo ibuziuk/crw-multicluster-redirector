@@ -3,8 +3,31 @@ const queryString = window.location.search;
 console.log("Query String: ", queryString);
 console.log("Base URL: ", window.location.origin);
 
-// Link to the Developer Sandbox Registration Service which we strore in the 'application.properties'
+var idToken;
+
+// Link to the Developer Sandbox Registration Service which we store in the 'application.properties' / 'developer.sandbox.registration-service.url'
 registrationServiceURL = window.location.origin + '/config'
+
+// gets the signup state once.
+function getSignupState(cbSuccess, cbError) {
+  getJSON('GET', signupURL, idToken, function(err, data) {
+    if (err != null) {
+      console.log('getSignup error..');
+      cbError(err, data);
+    } else {
+      console.log('getSignup successful..');
+      cbSuccess(data);
+    }
+  })
+}
+
+// shows state content. Given Id needs to be one of
+// state-waiting-for-provisioning, state-waiting-for-approval,
+// state-provisioned, state-getstarted, dashboard, state-error
+function show(elementId) {
+  console.log('showing element: ' + elementId);
+  document.getElementById(elementId).style.display = 'block';
+}
 
 function httpGetAsync(url, callback) {
     var xmlHttp = new XMLHttpRequest();
@@ -39,6 +62,23 @@ var getJSON = function(method, url, token, callback, body) {
     else
         xhr.send();
 };
+
+function refreshToken() {
+  // if the token is still valid for the next 30 sec, it is not refreshed.
+  console.log('check refreshing token..');
+  keycloak.updateToken(30)
+    .then(function(refreshed) {
+      console.log('token refresh result: ' + refreshed);
+    }).catch(function() {
+      console.log('failed to refresh the token, or the session has expired');
+    });
+}
+
+function login() {
+  // User clicked on Get Started. We can enable autoSignup after successful login now.
+  window.sessionStorage.setItem('autoSignup', 'true');
+  keycloak.login()
+}
 
 // this loads the js library at location 'url' dynamically and
 // calls 'cbSuccess' when the library was loaded successfully
@@ -87,8 +127,9 @@ function loadDataFromRegistrationService(registrationServiceBaseURL) {
                         keycloak.loadUserInfo()
                             .success(function(data) {
                                 console.log('retrieved user info..');
-                                idToken = keycloak.idToken
-                                showUser(data.preferred_username)
+                                idToken = keycloak.idToken;
+                                alert(data.preferred_username);
+//                                showUser(data.preferred_username)
                                 // now check the signup state of the user.
                                 updateSignupState();
                             })
@@ -97,14 +138,10 @@ function loadDataFromRegistrationService(registrationServiceBaseURL) {
                                 showError('Failed to pull in user data.');
                             });
                     } else {
-                        console.log('User not authenticated - redirecting to the Developer Sandbox');
+                        console.log('User not authenticated - initiating the login process');
                         setTimeout(function () {
-                            window.location.href = 'https://developers.redhat.com/developer-sandbox';
-                        }, 3000);
-//                        hideUser();
-//                        hideAll();
-//                        idToken = null
-//                        show('state-getstarted');
+                           login(); // Initiating the login process after 3 seconds
+                         }, 3000);
                     }
                 }).error(function() {
                     console.log('Failed to initialize authorization');
