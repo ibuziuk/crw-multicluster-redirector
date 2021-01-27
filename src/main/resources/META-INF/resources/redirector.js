@@ -111,6 +111,9 @@ function updateSignupState() {
   getSignupState(function(data) {
     console.log(JSON.stringify(data));
     alert(JSON.stringify(data));
+    setTimeout(function () {
+      window.location.href = data.cheDashboardURL;
+    }, 5000);
   }, function(err, data) {
     if (err === 404) {
       console.log('error 404');
