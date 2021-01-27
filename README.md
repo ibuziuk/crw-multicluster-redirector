@@ -45,8 +45,23 @@ If you want to learn more about building native executables, please consult http
 
 ## Creating an image
 
+To build a container image: 
+
+```shell script
+./mvnw clean package -Dquarkus.container-image.build=true
+```
+
+To push a container image to the registry:
+
 ```shell script
 ./mvnw clean package -Dquarkus.container-image.push=true
+
+```
+
+To build and push the native image to the registry:
+
+```shell script
+./mvnw package -Pnative -Dquarkus.native.container-build=true -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
 ```
 
 The list of released images is available on [quay.io](https://quay.io/repository/ibuziuk/crw-multicluster-redirector?tab=tags)
