@@ -3,10 +3,12 @@ const queryString = window.location.search;
 console.log("Query String: ", queryString);
 console.log("Base URL: ", window.location.origin);
 
-var idToken;
-
 // Link to the Developer Sandbox Registration Service which we store in the 'application.properties' / 'developer.sandbox.registration-service.url'
 registrationServiceURL = window.location.origin + '/config'
+
+var signupURL;
+var phoneVerificationURL;
+var idToken;
 
 // gets the signup state once.
 function getSignupState(cbSuccess, cbError) {
@@ -103,9 +105,29 @@ function loadAuthLibrary(url, cbSuccess, cbError) {
     document.getElementsByTagName('head')[0].appendChild(script);
 }
 
+// updates the signup state.
+function updateSignupState() {
+  console.log('updating signup state..');
+  getSignupState(function(data) {
+    console.log(JSON.stringify(data));
+    alert(JSON.stringify(data));
+  }, function(err, data) {
+    if (err === 404) {
+      console.log('error 404');
+    } else if (err === 401) {
+      console.log('error 401');
+    } else {
+      // some other error
+      console.log(err);
+    }
+  })
+}
+
 function loadDataFromRegistrationService(registrationServiceBaseURL) {
     // this is where the Registration Services stores SSO / keycloak configuration
     configURL = registrationServiceBaseURL + '/api/v1/authconfig';
+    signupURL = registrationServiceBaseURL + '/api/v1/signup';
+
     getJSON('GET', configURL, null, function(err, data) {
         if (err !== null) {
             console.log('error loading client config' + err);
@@ -128,7 +150,7 @@ function loadDataFromRegistrationService(registrationServiceBaseURL) {
                             .success(function(data) {
                                 console.log('retrieved user info..');
                                 idToken = keycloak.idToken;
-                                alert(data.preferred_username);
+                                alert(JSON.stringify(data));
 //                                showUser(data.preferred_username)
                                 // now check the signup state of the user.
                                 updateSignupState();
@@ -141,7 +163,7 @@ function loadDataFromRegistrationService(registrationServiceBaseURL) {
                         console.log('User not authenticated - initiating the login process');
                         setTimeout(function () {
                            login(); // Initiating the login process after 3 seconds
-                         }, 3000);
+                         }, 1000);
                     }
                 }).error(function() {
                     console.log('Failed to initialize authorization');
