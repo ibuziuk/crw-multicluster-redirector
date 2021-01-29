@@ -1,10 +1,13 @@
-const queryString = window.location.search;
+const origin = window.location.origin;
+const path = window.location.pathname;
+const query = window.location.search;
 
-console.log("Query String: ", queryString);
-console.log("Base URL: ", window.location.origin);
+console.log("Origin: ", origin);
+console.log("Path: ", path);
+console.log("Query: ", query);
 
 // Link to the Developer Sandbox Registration Service which we store in the 'application.properties' / 'developer.sandbox.registration-service.url'
-registrationServiceURL = window.location.origin + '/config'
+const registrationServiceURL = window.location.origin + '/config'
 
 var signupURL;
 var phoneVerificationURL;
@@ -21,14 +24,6 @@ function getSignupState(cbSuccess, cbError) {
       cbSuccess(data);
     }
   })
-}
-
-// shows state content. Given Id needs to be one of
-// state-waiting-for-provisioning, state-waiting-for-approval,
-// state-provisioned, state-getstarted, dashboard, state-error
-function show(elementId) {
-  console.log('showing element: ' + elementId);
-  document.getElementById(elementId).style.display = 'block';
 }
 
 function httpGetAsync(url, callback) {
@@ -111,9 +106,8 @@ function updateSignupState() {
   getSignupState(function(data) {
     console.log(JSON.stringify(data));
     alert(JSON.stringify(data));
-    setTimeout(function () {
-      window.location.href = data.cheDashboardURL;
-    }, 5000);
+    let url = data.cheDashboardURL + path + query;
+    redirect(url);
   }, function(err, data) {
     if (err === 404) {
       console.log('error 404');
@@ -124,6 +118,13 @@ function updateSignupState() {
       console.log(err);
     }
   })
+}
+
+function redirect(url) {
+    console.log("Redirect URL: ", url)
+    setTimeout(function () {
+      window.location.href = url;
+    }, 5000);
 }
 
 function loadDataFromRegistrationService(registrationServiceBaseURL) {
@@ -181,7 +182,3 @@ function loadDataFromRegistrationService(registrationServiceBaseURL) {
 }
 
 httpGetAsync(registrationServiceURL, loadDataFromRegistrationService);
-
-// setTimeout(function () {
-//     window.location.href = 'https://developers.redhat.com/developer-sandbox';
-// }, 5000);
