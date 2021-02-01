@@ -10,8 +10,15 @@ console.log("Query: ", query);
 const registrationServiceURL = window.location.origin + '/config'
 
 var signupURL;
-var phoneVerificationURL;
 var idToken;
+
+// shows state content. Given Id needs to be one of
+// state-waiting-for-provisioning, state-waiting-for-approval,
+// state-provisioned, state-getstarted, dashboard, state-error
+function show(elementId) {
+  console.log('showing element: ' + elementId);
+  document.getElementById(elementId).style.display = 'block';
+}
 
 // gets the signup state once.
 function getSignupState(cbSuccess, cbError) {
@@ -110,7 +117,9 @@ function updateSignupState() {
     redirect(url);
   }, function(err, data) {
     if (err === 404) {
-      console.log('error 404');
+      console.log('error 404 - User has not been regestred in the Developer Sandbox. Redirecting to the landing...');
+      show("text");
+      redirect('https://developers.redhat.com/developer-sandbox');
     } else if (err === 401) {
       console.log('error 401');
     } else {
