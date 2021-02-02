@@ -133,7 +133,6 @@ function updateSignupState() {
     console.log('updating signup state..');
     getSignupState(function(data) {
         console.log(JSON.stringify(data));
-        alert(JSON.stringify(data));
         if (data && data.cheDashboardURL) {
             let url = generateRedirectUrlFromSignupData(data);
             show("loader");
@@ -180,7 +179,6 @@ function loadDataFromRegistrationService(registrationServiceBaseURL) {
                             .success(function(data) {
                                 console.log('retrieved user info..');
                                 idToken = keycloak.idToken;
-                                alert(JSON.stringify(data));
                                 // showUser(data.preferred_username)
                                 // now check the signup state of the user.
                                 updateSignupState();
