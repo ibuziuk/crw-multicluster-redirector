@@ -7,30 +7,21 @@ console.log("Path: ", path);
 console.log("Query: ", query);
 
 // Link to the Developer Sandbox Registration Service which we store in the 'application.properties' / 'developer.sandbox.registration-service.url'
-const registrationServiceURL = window.location.origin + '/config'
+const registrationServiceURL = origin + '/config'
 
 var signupURL;
 var idToken;
 
-// shows state content. Given Id needs to be one of
-// state-waiting-for-provisioning, state-waiting-for-approval,
-// state-provisioned, state-getstarted, dashboard, state-error
+// shows state content. Given Id needs to be one of TODO
 function show(elementId) {
-  console.log('showing element: ' + elementId);
-  document.getElementById(elementId).style.display = 'block';
+    console.log('showing element: ' + elementId);
+    document.getElementById(elementId).style.display = 'block';
 }
 
-// gets the signup state once.
-function getSignupState(cbSuccess, cbError) {
-  getJSON('GET', signupURL, idToken, function(err, data) {
-    if (err != null) {
-      console.log('getSignup error..');
-      cbError(err, data);
-    } else {
-      console.log('getSignup successful..');
-      cbSuccess(data);
-    }
-  })
+// hides state content. Given Id needs to be one of TODO
+function hide(elementId) {
+    console.log('hiding element: ' + elementId);
+    document.getElementById(elementId).style.display = 'none';
 }
 
 function httpGetAsync(url, callback) {
@@ -67,21 +58,51 @@ var getJSON = function(method, url, token, callback, body) {
         xhr.send();
 };
 
+// redirects to the URL after 3 seconds
+function redirect(url) {
+    console.log("Redirect URL: ", url)
+    setTimeout(function() {
+        window.location.href = url;
+    }, 3000);
+}
+
+// TODO
+function generateRedirectUrlFromSignupData(data) {
+    let dashboardURL = data.cheDashboardURL;
+    if (dashboardURL.endsWith("/")) {
+        dashboardURL = dashboardURL.slice(0, -1);
+    }
+    return dashboardURL + path + query;
+}
+
+// gets the signup state once.
+function getSignupState(cbSuccess, cbError) {
+    getJSON('GET', signupURL, idToken, function(err, data) {
+        if (err != null) {
+            console.log('getSignup error..');
+            cbError(err, data);
+        } else {
+            console.log('getSignup successful..');
+            cbSuccess(data);
+        }
+    })
+}
+
 function refreshToken() {
-  // if the token is still valid for the next 30 sec, it is not refreshed.
-  console.log('check refreshing token..');
-  keycloak.updateToken(30)
-    .then(function(refreshed) {
-      console.log('token refresh result: ' + refreshed);
-    }).catch(function() {
-      console.log('failed to refresh the token, or the session has expired');
-    });
+    // if the token is still valid for the next 30 sec, it is not refreshed.
+    console.log('check refreshing token..');
+    keycloak.updateToken(30)
+        .then(function(refreshed) {
+            console.log('token refresh result: ' + refreshed);
+        }).catch(function() {
+            console.log('failed to refresh the token, or the session has expired');
+        });
 }
 
 function login() {
-  // User clicked on Get Started. We can enable autoSignup after successful login now.
-  window.sessionStorage.setItem('autoSignup', 'true');
-  keycloak.login()
+    // User clicked on Get Started. We can enable autoSignup after successful login now.
+    window.sessionStorage.setItem('autoSignup', 'true');
+    keycloak.login()
 }
 
 // this loads the js library at location 'url' dynamically and
@@ -109,31 +130,27 @@ function loadAuthLibrary(url, cbSuccess, cbError) {
 
 // updates the signup state.
 function updateSignupState() {
-  console.log('updating signup state..');
-  getSignupState(function(data) {
-    console.log(JSON.stringify(data));
-    alert(JSON.stringify(data));
-    let url = data.cheDashboardURL + path + query;
-    redirect(url);
-  }, function(err, data) {
-    if (err === 404) {
-      console.log('error 404 - User has not been regestred in the Developer Sandbox. Redirecting to the landing...');
-      show("text");
-      redirect('https://developers.redhat.com/developer-sandbox');
-    } else if (err === 401) {
-      console.log('error 401');
-    } else {
-      // some other error
-      console.log(err);
-    }
-  })
-}
-
-function redirect(url) {
-    console.log("Redirect URL: ", url)
-    setTimeout(function () {
-      window.location.href = url;
-    }, 5000);
+    console.log('updating signup state..');
+    getSignupState(function(data) {
+        console.log(JSON.stringify(data));
+        alert(JSON.stringify(data));
+        if (data && data.cheDashboardURL) {
+            let url = generateRedirectUrlFromSignupData(data);
+            show("loader");
+            redirect(url);
+        }
+    }, function(err, data) {
+        if (err === 404) {
+            console.log('error 404 - User has not been regestred in the Developer Sandbox. Redirecting to the landing...');
+            show("developer-sandbox");
+            redirect('https://developers.redhat.com/developer-sandbox');
+        } else if (err === 401) {
+            console.log('error 401');
+        } else {
+            // some other error
+            console.log(err);
+        }
+    })
 }
 
 function loadDataFromRegistrationService(registrationServiceBaseURL) {
@@ -164,7 +181,7 @@ function loadDataFromRegistrationService(registrationServiceBaseURL) {
                                 console.log('retrieved user info..');
                                 idToken = keycloak.idToken;
                                 alert(JSON.stringify(data));
-//                                showUser(data.preferred_username)
+                                // showUser(data.preferred_username)
                                 // now check the signup state of the user.
                                 updateSignupState();
                             })
@@ -174,9 +191,9 @@ function loadDataFromRegistrationService(registrationServiceBaseURL) {
                             });
                     } else {
                         console.log('User not authenticated - initiating the login process');
-                        setTimeout(function () {
-                           login(); // Initiating the login process after 3 seconds
-                         }, 1000);
+                        setTimeout(function() {
+                            login(); // Initiating the login process after 3 seconds
+                        }, 1000);
                     }
                 }).error(function() {
                     console.log('Failed to initialize authorization');
