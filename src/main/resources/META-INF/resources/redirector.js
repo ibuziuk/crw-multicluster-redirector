@@ -6,22 +6,39 @@ console.log("Origin: ", origin);
 console.log("Path: ", path);
 console.log("Query: ", query);
 
-// Link to the Developer Sandbox Registration Service which we store in the 'application.properties' / 'developer.sandbox.registration-service.url'
+// Link to the Developer Sandbox Registration Service which we store in the 'application.properties' / 'developer.sandbox.registration-service.url'.
 const registrationServiceURL = origin + '/config'
 
 var signupURL;
+var configURL;
 var idToken;
 
-// shows state content. Given Id needs to be one of TODO
+// Shows state content.
+// Given Id needs to be one of 'loading-crw-text', 'register-developer-sandbox-text' or 'error-text'.
 function show(elementId) {
     console.log('showing element: ' + elementId);
     document.getElementById(elementId).style.display = 'block';
 }
 
-// hides state content. Given Id needs to be one of TODO
+// Hides state content.
+// Given Id needs to be one of 'loading-crw-text', 'register-developer-sandbox-text' or 'error-text'.
 function hide(elementId) {
     console.log('hiding element: ' + elementId);
     document.getElementById(elementId).style.display = 'none';
+}
+
+// hides all state content.
+function hideAll() {
+  console.log('hiding all..');
+  document.getElementById('loading-crw-text').style.display = 'none';
+  document.getElementById('register-developer-sandbox-text').style.display = 'none';
+}
+
+function showError(errorText) {
+  hideAll();
+  show('error-text');
+  show('error-status');
+  document.getElementById('error-status').textContent = errorText;
 }
 
 function httpGetAsync(url, callback) {
@@ -34,7 +51,7 @@ function httpGetAsync(url, callback) {
     xmlHttp.send(null);
 }
 
-// loads json data from url, the callback is called with
+// Loads json data from url, the callback is called with
 // error and data, with data the parsed json.
 var getJSON = function(method, url, token, callback, body) {
     var xhr = new XMLHttpRequest();
@@ -58,7 +75,7 @@ var getJSON = function(method, url, token, callback, body) {
         xhr.send();
 };
 
-// redirects to the URL after 3 seconds
+// Redirects to the URL after 3 seconds
 function redirect(url) {
     console.log("Redirect URL: ", url)
     setTimeout(function() {
@@ -75,7 +92,7 @@ function generateRedirectUrlFromSignupData(data) {
     return dashboardURL + path + query;
 }
 
-// gets the signup state once.
+// Gets the signup state once.
 function getSignupState(cbSuccess, cbError) {
     getJSON('GET', signupURL, idToken, function(err, data) {
         if (err != null) {
@@ -100,6 +117,7 @@ function refreshToken() {
 }
 
 function login() {
+    // TODO: Doe we need ``autoSignup` true?s
     // User clicked on Get Started. We can enable autoSignup after successful login now.
     window.sessionStorage.setItem('autoSignup', 'true');
     keycloak.login()
@@ -135,19 +153,21 @@ function updateSignupState() {
         console.log(JSON.stringify(data));
         if (data && data.cheDashboardURL) {
             let url = generateRedirectUrlFromSignupData(data);
-            show("loader");
+            show("loading-crw-text");
             redirect(url);
         }
     }, function(err, data) {
         if (err === 404) {
             console.log('error 404 - User has not been regestred in the Developer Sandbox. Redirecting to the landing...');
-            show("developer-sandbox");
-            redirect('https://developers.redhat.com/developer-sandbox');
+            show("register-developer-sandbox-text");
+            redirect('https://developers.redhat.com/developer-sandbox#assembly-field-sections-59571');
         } else if (err === 401) {
             console.log('error 401');
+            showError(err);
         } else {
             // some other error
             console.log(err);
+            showError(err);
         }
     })
 }
@@ -191,7 +211,7 @@ function loadDataFromRegistrationService(registrationServiceBaseURL) {
                         console.log('User not authenticated - initiating the login process');
                         setTimeout(function() {
                             login(); // Initiating the login process after 3 seconds
-                        }, 1000);
+                        }, 3000);
                     }
                 }).error(function() {
                     console.log('Failed to initialize authorization');
