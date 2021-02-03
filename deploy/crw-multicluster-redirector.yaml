@@ -106,6 +106,7 @@ objects:
     name: crw-multicluster-redirector
     creationTimestamp: null
   spec:
+    host: workspaces.openshift.com
     to:
       kind: Service
       name: crw-multicluster-redirector
