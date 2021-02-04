@@ -104,6 +104,8 @@ objects:
   apiVersion: v1
   metadata:
     name: crw-multicluster-redirector
+    annotations:
+      kubernetes.io/tls-acme: "true"
     creationTimestamp: null
   spec:
     host: workspaces.openshift.com
