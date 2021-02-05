@@ -32,6 +32,8 @@ function hideAll() {
   console.log('hiding all..');
   document.getElementById('loading-crw-text').style.display = 'none';
   document.getElementById('register-developer-sandbox-text').style.display = 'none';
+  document.getElementById('error-text').style.display = 'none';
+  document.getElementById('error-status').style.display = 'none';
 }
 
 function showError(errorText) {
@@ -83,7 +85,7 @@ function redirect(url) {
     }, 3000);
 }
 
-// TODO
+// Generates the redirect URL to the right CRW instance with path and query parameteres
 function generateRedirectUrlFromSignupData(data) {
     let dashboardURL = data.cheDashboardURL;
     if (dashboardURL.endsWith("/")) {
@@ -92,7 +94,7 @@ function generateRedirectUrlFromSignupData(data) {
     return dashboardURL + path + query;
 }
 
-// Gets the signup state once.
+// Gets the signup state
 function getSignupState(cbSuccess, cbError) {
     getJSON('GET', signupURL, idToken, function(err, data) {
         if (err != null) {
@@ -117,7 +119,7 @@ function refreshToken() {
 }
 
 function login() {
-    // TODO: Doe we need ``autoSignup` true?s
+    // TODO: Doe we need ``autoSignup` true ?
     // User clicked on Get Started. We can enable autoSignup after successful login now.
     window.sessionStorage.setItem('autoSignup', 'true');
     keycloak.login()
@@ -155,6 +157,8 @@ function updateSignupState() {
             let url = generateRedirectUrlFromSignupData(data);
             show("loading-crw-text");
             redirect(url);
+        } else {
+            showError("Failed to load data from the Developer Sandbox Registration service");
         }
     }, function(err, data) {
         if (err === 404) {
