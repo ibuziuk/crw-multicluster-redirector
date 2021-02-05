@@ -71,9 +71,3 @@ The list of released images is available on [quay.io](https://quay.io/repository
 ```shell script
 oc process -f deploy/crw-multicluster-redirector.yaml | oc apply -f -
 ```
-
-# RESTEasy JAX-RS
-
-<p>A Hello World RESTEasy resource</p>
-
-Guide: https://quarkus.io/guides/rest-json
