@@ -25,7 +25,7 @@ var configURL;
 var idToken;
 
 // Shows state content.
-// Given Id needs to be one of 'loading-crw-text', 'register-developer-sandbox-text' or 'error-text'.
+// Given Id needs to be one of 'loading-crw-text', 'register-developer-sandbox-text', 'error-text' or 'verify-account-text'.
 function show(elementId) {
     console.log('showing element: ' + elementId);
     document.getElementById(elementId).style.display = 'block';
@@ -43,6 +43,7 @@ function hideAll() {
   console.log('hiding all..');
   document.getElementById('loading-crw-text').style.display = 'none';
   document.getElementById('register-developer-sandbox-text').style.display = 'none';
+  document.getElementById('verify-account-text').style.display = 'none';
   document.getElementById('error-text').style.display = 'none';
   document.getElementById('error-status').style.display = 'none';
 }
@@ -168,6 +169,10 @@ function updateSignupState() {
             let url = generateRedirectUrlFromSignupData(data);
             show("loading-crw-text");
             redirect(url);
+        } else if (data && data.status.verificationRequired) {
+            hideAll();
+            show("verify-account-text");
+            redirect('https://developers.redhat.com/developer-sandbox#assembly-field-sections-59571');
         } else {
             showError("Failed to load data from the Developer Sandbox Registration service");
         }
